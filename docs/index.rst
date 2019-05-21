@@ -20,7 +20,7 @@ Set Up
 Cache is managed through a ``Cache`` instance::
 
     from flask import Flask
-    from flask.ext.cache import Cache
+    from flask_cache import Cache
 
     app = Flask(__name__)
     # Check Configuring Flask-Cache section for more details
@@ -243,7 +243,7 @@ The following configuration values exist for Flask-Cache:
                                 * **null**: NullCache (default)
                                 * **simple**: SimpleCache
                                 * **memcached**: MemcachedCache (pylibmc or memcache required)
-                                * **gaememcached**: GAEMemcachedCache
+                                * **gaememcached**: GAEMemcachedCache !!! Removed temporarily?
                                 * **redis**: RedisCache (Werkzeug 0.7 required)
                                 * **filesystem**: FileSystemCache
                                 * **saslmemcached**: SASLMemcachedCache (pylibmc required)
@@ -340,7 +340,7 @@ Relevant configuration values
 
 GAEMemcachedCache -- gaememcached
 `````````````````````````````````
-
+!!! Removed in 0.14, is it really different than memcached?
 Is MemcachedCache under a different name
 
 SASLMemcachedCache -- saslmemcached

@@ -1,6 +1,5 @@
 import pickle
-from werkzeug.contrib.cache import (BaseCache, NullCache, SimpleCache, MemcachedCache,
-                                    GAEMemcachedCache, FileSystemCache)
+from cachelib import (BaseCache, NullCache, SimpleCache, MemcachedCache, FileSystemCache)
 from ._compat import range_type
 
 
@@ -25,14 +24,17 @@ class SASLMemcachedCache(MemcachedCache):
 def null(app, config, args, kwargs):
     return NullCache()
 
+
 def simple(app, config, args, kwargs):
     kwargs.update(dict(threshold=config['CACHE_THRESHOLD']))
     return SimpleCache(*args, **kwargs)
+
 
 def memcached(app, config, args, kwargs):
     args.append(config['CACHE_MEMCACHED_SERVERS'])
     kwargs.update(dict(key_prefix=config['CACHE_KEY_PREFIX']))
     return MemcachedCache(*args, **kwargs)
+
 
 def saslmemcached(app, config, args, kwargs):
     args.append(config['CACHE_MEMCACHED_SERVERS'])
@@ -41,14 +43,18 @@ def saslmemcached(app, config, args, kwargs):
                        key_prefix=config['CACHE_KEY_PREFIX']))
     return SASLMemcachedCache(*args, **kwargs)
 
+"""
 def gaememcached(app, config, args, kwargs):
     kwargs.update(dict(key_prefix=config['CACHE_KEY_PREFIX']))
     return GAEMemcachedCache(*args, **kwargs)
+"""
+
 
 def filesystem(app, config, args, kwargs):
     args.insert(0, config['CACHE_DIR'])
     kwargs.update(dict(threshold=config['CACHE_THRESHOLD']))
     return FileSystemCache(*args, **kwargs)
+
 
 # RedisCache is supported since Werkzeug 0.7.
 try:
@@ -77,9 +83,9 @@ else:
         redis_url = config.get('CACHE_REDIS_URL')
         if redis_url:
             kwargs['host'] = redis_from_url(
-                                redis_url,
-                                db=kwargs.pop('db', None),
-                            )
+                redis_url,
+                db=kwargs.pop('db', None),
+            )
 
         return RedisCache(*args, **kwargs)
 
@@ -93,8 +99,7 @@ class SpreadSASLMemcachedCache(SASLMemcachedCache):
     impact the performances.
     """
 
-
-    def __init__(self,  *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         chunksize : (int) max size in bytes of chunk stored in memcached
         """
@@ -105,7 +110,6 @@ class SpreadSASLMemcachedCache(SASLMemcachedCache):
     def delete(self, key):
         for skey in self._genkeys(key):
             super(SpreadSASLMemcachedCache, self).delete(skey)
-
 
     def set(self, key, value, timeout=None, chunk=True):
         """set a value in cache, potentially spreding it across multiple key.
@@ -130,9 +134,9 @@ class SpreadSASLMemcachedCache(SASLMemcachedCache):
         len_ser = len(serialized)
         chks = range_type(0, len_ser, self.chunksize)
         if len(chks) > self.maxchunk:
-            raise ValueError('Cannot store value in less than %s keys'%(self.maxchunk))
+            raise ValueError('Cannot store value in less than %s keys' % (self.maxchunk))
         for i in chks:
-            values['%s.%s' % (key, i//self.chunksize)] = serialized[i : i+self.chunksize]
+            values['%s.%s' % (key, i // self.chunksize)] = serialized[i: i + self.chunksize]
         super(SpreadSASLMemcachedCache, self).set_many(values, timeout)
 
     def get(self, key, chunk=True):
@@ -140,9 +144,9 @@ class SpreadSASLMemcachedCache(SASLMemcachedCache):
 
         chunk : (Bool) if set to false, get a value set with set(..., chunk=False)
         """
-        if chunk :
+        if chunk:
             return self._get(key)
-        else :
+        else:
             return super(SpreadSASLMemcachedCache, self).get(key)
 
     def _genkeys(self, key):
@@ -150,17 +154,17 @@ class SpreadSASLMemcachedCache(SASLMemcachedCache):
 
     def _get(self, key):
         to_get = ['%s.%s' % (key, i) for i in range_type(self.maxchunk)]
-        result = super(SpreadSASLMemcachedCache, self).get_many( *to_get)
+        result = super(SpreadSASLMemcachedCache, self).get_many(*to_get)
         serialized = ''.join([v for v in result if v is not None])
         if not serialized:
             return None
         return pickle.loads(serialized)
 
-def spreadsaslmemcachedcache(app, config, args, kwargs):
 
+def spreadsaslmemcachedcache(app, config, args, kwargs):
     args.append(config['CACHE_MEMCACHED_SERVERS'])
     kwargs.update(dict(username=config.get('CACHE_MEMCACHED_USERNAME'),
                        password=config.get('CACHE_MEMCACHED_PASSWORD'),
-                     key_prefix=config.get('CACHE_KEY_PREFIX')
-                  ))
+                       key_prefix=config.get('CACHE_KEY_PREFIX')
+                       ))
     return SpreadSASLMemcachedCache(*args, **kwargs)

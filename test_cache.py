@@ -7,12 +7,13 @@ import random
 import string
 
 from flask import Flask, render_template, render_template_string
-from flask.ext.cache import Cache, function_namespace, make_template_fragment_key
+from flask_cache import Cache, function_namespace, make_template_fragment_key
 
-if sys.version_info < (2,7):
+if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
     import unittest
+
 
 class CacheTestCase(unittest.TestCase):
 
@@ -130,7 +131,7 @@ class CacheTestCase(unittest.TestCase):
         with self.app.test_request_context():
             @self.cache.memoize(5)
             def big_foo(a, b):
-                return a+b+random.randrange(0, 100000)
+                return a + b + random.randrange(0, 100000)
 
             result = big_foo(5, 2)
 
@@ -156,7 +157,7 @@ class CacheTestCase(unittest.TestCase):
         with self.app.test_request_context():
             @self.cache.memoize(50)
             def big_foo(a, b):
-                return a+b+random.randrange(0, 100000)
+                return a + b + random.randrange(0, 100000)
 
             result = big_foo(5, 2)
 
@@ -169,7 +170,7 @@ class CacheTestCase(unittest.TestCase):
         with self.app.test_request_context():
             @self.cache.memoize(5)
             def big_foo(a, b):
-                return a+b+random.randrange(0, 100000)
+                return a + b + random.randrange(0, 100000)
 
             result = big_foo(5, 2)
             result2 = big_foo(5, 3)
@@ -190,7 +191,7 @@ class CacheTestCase(unittest.TestCase):
         with self.app.test_request_context():
             @self.cache.memoize(5)
             def big_foo(a, b):
-                return a+b+random.randrange(0, 100000)
+                return a + b + random.randrange(0, 100000)
 
             result = big_foo(5, 2)
             result2 = big_foo(5, 3)
@@ -218,7 +219,7 @@ class CacheTestCase(unittest.TestCase):
         with self.app.test_request_context():
             @self.cache.memoize()
             def big_foo(a, b):
-                return a+b+random.randrange(0, 100000)
+                return a + b + random.randrange(0, 100000)
 
             result_a = big_foo(5, 1)
             result_b = big_foo(5, 2)
@@ -240,41 +241,41 @@ class CacheTestCase(unittest.TestCase):
         with self.app.test_request_context():
             @self.cache.memoize()
             def big_foo(a, b):
-                return sum(a)+sum(b)+random.randrange(0, 100000)
+                return sum(a) + sum(b) + random.randrange(0, 100000)
 
-            result_a = big_foo([5,3,2], [1])
-            result_b = big_foo([3,3], [3,1])
+            result_a = big_foo([5, 3, 2], [1])
+            result_b = big_foo([3, 3], [3, 1])
 
-            assert big_foo([5,3,2], [1]) == result_a
-            assert big_foo([3,3], [3,1]) == result_b
+            assert big_foo([5, 3, 2], [1]) == result_a
+            assert big_foo([3, 3], [3, 1]) == result_b
 
-            self.cache.delete_memoized(big_foo, [5,3,2], [1])
+            self.cache.delete_memoized(big_foo, [5, 3, 2], [1])
 
-            assert big_foo([5,3,2], [1]) != result_a
-            assert big_foo([3,3], [3,1]) == result_b
+            assert big_foo([5, 3, 2], [1]) != result_a
+            assert big_foo([3, 3], [3, 1]) == result_b
 
             ## Cleanup bigfoo 5,1 5,2 or it might conflict with
             ## following run if it also uses memecache
-            self.cache.delete_memoized(big_foo, [5,3,2], [1])
-            self.cache.delete_memoized(big_foo, [3,3], [1])
+            self.cache.delete_memoized(big_foo, [5, 3, 2], [1])
+            self.cache.delete_memoized(big_foo, [3, 3], [1])
 
     def test_10_kwargs_memoize(self):
 
         with self.app.test_request_context():
             @self.cache.memoize()
             def big_foo(a, b=None):
-                return a+sum(b.values())+random.randrange(0, 100000)
+                return a + sum(b.values()) + random.randrange(0, 100000)
 
-            result_a = big_foo(1, dict(one=1,two=2))
-            result_b = big_foo(5, dict(three=3,four=4))
+            result_a = big_foo(1, dict(one=1, two=2))
+            result_b = big_foo(5, dict(three=3, four=4))
 
-            assert big_foo(1, dict(one=1,two=2)) == result_a
-            assert big_foo(5, dict(three=3,four=4)) == result_b
+            assert big_foo(1, dict(one=1, two=2)) == result_a
+            assert big_foo(5, dict(three=3, four=4)) == result_b
 
-            self.cache.delete_memoized(big_foo, 1, dict(one=1,two=2))
+            self.cache.delete_memoized(big_foo, 1, dict(one=1, two=2))
 
-            assert big_foo(1, dict(one=1,two=2)) != result_a
-            assert big_foo(5, dict(three=3,four=4)) == result_b
+            assert big_foo(1, dict(one=1, two=2)) != result_a
+            assert big_foo(5, dict(three=3, four=4)) == result_b
 
     def test_10a_kwargonly_memoize(self):
 
@@ -283,7 +284,7 @@ class CacheTestCase(unittest.TestCase):
             def big_foo(a=None):
                 if a is None:
                     a = 0
-                return a+random.random()
+                return a + random.random()
 
             result_a = big_foo()
             result_b = big_foo(5)
@@ -297,12 +298,12 @@ class CacheTestCase(unittest.TestCase):
         with self.app.test_request_context():
             @self.cache.memoize()
             def f(a, b, c=1):
-                return a+b+c+random.randrange(0, 100000)
+                return a + b + c + random.randrange(0, 100000)
 
-            assert f(1,2) == f(1,2,c=1)
-            assert f(1,2) == f(1,2,1)
-            assert f(1,2) == f(1,2)
-            assert f(1,2,3) != f(1,2)
+            assert f(1, 2) == f(1, 2, c=1)
+            assert f(1, 2) == f(1, 2, 1)
+            assert f(1, 2) == f(1, 2)
+            assert f(1, 2, 3) != f(1, 2)
             with self.assertRaises(TypeError):
                 f(1)
 
@@ -393,7 +394,7 @@ class CacheTestCase(unittest.TestCase):
                 @classmethod
                 @self.cache.memoize(5)
                 def big_foo(cls, a, b):
-                    return a+b+random.randrange(0, 100000)
+                    return a + b + random.randrange(0, 100000)
 
             result = Mock.big_foo(5, 2)
             result2 = Mock.big_foo(5, 3)
@@ -498,62 +499,62 @@ class CacheTestCase(unittest.TestCase):
     def test_14_memoized_multiple_arg_kwarg_calls(self):
         with self.app.test_request_context():
             @self.cache.memoize()
-            def big_foo(a, b,c=[1,1],d=[1,1]):
-                return sum(a)+sum(b)+sum(c)+sum(d)+random.randrange(0, 100000)
+            def big_foo(a, b, c=[1, 1], d=[1, 1]):
+                return sum(a) + sum(b) + sum(c) + sum(d) + random.randrange(0, 100000)
 
-            result_a = big_foo([5,3,2], [1], c=[3,3], d=[3,3])
+            result_a = big_foo([5, 3, 2], [1], c=[3, 3], d=[3, 3])
 
-            assert big_foo([5,3,2], [1], d=[3,3], c=[3,3]) == result_a
-            assert big_foo(b=[1],a=[5,3,2],c=[3,3],d=[3,3]) == result_a
-            assert big_foo([5,3,2], [1], [3,3], [3,3]) == result_a
+            assert big_foo([5, 3, 2], [1], d=[3, 3], c=[3, 3]) == result_a
+            assert big_foo(b=[1], a=[5, 3, 2], c=[3, 3], d=[3, 3]) == result_a
+            assert big_foo([5, 3, 2], [1], [3, 3], [3, 3]) == result_a
 
     def test_15_memoize_multiple_arg_kwarg_delete(self):
         with self.app.test_request_context():
             @self.cache.memoize()
-            def big_foo(a, b,c=[1,1],d=[1,1]):
-                return sum(a)+sum(b)+sum(c)+sum(d)+random.randrange(0, 100000)
+            def big_foo(a, b, c=[1, 1], d=[1, 1]):
+                return sum(a) + sum(b) + sum(c) + sum(d) + random.randrange(0, 100000)
 
-            result_a = big_foo([5,3,2], [1], c=[3,3], d=[3,3])
-            self.cache.delete_memoized(big_foo, [5,3,2],[1],[3,3],[3,3])
-            result_b = big_foo([5,3,2], [1], c=[3,3], d=[3,3])
+            result_a = big_foo([5, 3, 2], [1], c=[3, 3], d=[3, 3])
+            self.cache.delete_memoized(big_foo, [5, 3, 2], [1], [3, 3], [3, 3])
+            result_b = big_foo([5, 3, 2], [1], c=[3, 3], d=[3, 3])
             assert result_a != result_b
 
-            self.cache.delete_memoized(big_foo, [5,3,2],b=[1],c=[3,3],d=[3,3])
-            result_b = big_foo([5,3,2], [1], c=[3,3], d=[3,3])
+            self.cache.delete_memoized(big_foo, [5, 3, 2], b=[1], c=[3, 3], d=[3, 3])
+            result_b = big_foo([5, 3, 2], [1], c=[3, 3], d=[3, 3])
             assert result_a != result_b
 
-            self.cache.delete_memoized(big_foo, [5,3,2],[1],c=[3,3],d=[3,3])
-            result_a = big_foo([5,3,2], [1], c=[3,3], d=[3,3])
+            self.cache.delete_memoized(big_foo, [5, 3, 2], [1], c=[3, 3], d=[3, 3])
+            result_a = big_foo([5, 3, 2], [1], c=[3, 3], d=[3, 3])
             assert result_a != result_b
 
-            self.cache.delete_memoized(big_foo, [5,3,2],b=[1],c=[3,3],d=[3,3])
-            result_a = big_foo([5,3,2], [1], c=[3,3], d=[3,3])
+            self.cache.delete_memoized(big_foo, [5, 3, 2], b=[1], c=[3, 3], d=[3, 3])
+            result_a = big_foo([5, 3, 2], [1], c=[3, 3], d=[3, 3])
             assert result_a != result_b
 
-            self.cache.delete_memoized(big_foo, [5,3,2],[1],c=[3,3],d=[3,3])
-            result_b = big_foo([5,3,2], [1], c=[3,3], d=[3,3])
+            self.cache.delete_memoized(big_foo, [5, 3, 2], [1], c=[3, 3], d=[3, 3])
+            result_b = big_foo([5, 3, 2], [1], c=[3, 3], d=[3, 3])
             assert result_a != result_b
 
-            self.cache.delete_memoized(big_foo, [5,3,2],[1],[3,3],[3,3])
-            result_a = big_foo([5,3,2], [1], c=[3,3], d=[3,3])
+            self.cache.delete_memoized(big_foo, [5, 3, 2], [1], [3, 3], [3, 3])
+            result_a = big_foo([5, 3, 2], [1], c=[3, 3], d=[3, 3])
             assert result_a != result_b
 
     def test_16_memoize_kwargs_to_args(self):
         with self.app.test_request_context():
             def big_foo(a, b, c=None, d=None):
-                return sum(a)+sum(b)+random.randrange(0, 100000)
+                return sum(a) + sum(b) + random.randrange(0, 100000)
 
-            expected = (1,2,'foo','bar')
+            expected = (1, 2, 'foo', 'bar')
 
-            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, 1,2,'foo','bar')
+            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, 1, 2, 'foo', 'bar')
             assert (args == expected)
-            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, 2,'foo','bar',a=1)
+            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, 2, 'foo', 'bar', a=1)
             assert (args == expected)
-            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, a=1,b=2,c='foo',d='bar')
+            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, a=1, b=2, c='foo', d='bar')
             assert (args == expected)
-            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, d='bar',b=2,a=1,c='foo')
+            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, d='bar', b=2, a=1, c='foo')
             assert (args == expected)
-            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, 1,2,d='bar',c='foo')
+            args, kwargs = self.cache._memoize_kwargs_to_args(big_foo, 1, 2, d='bar', c='foo')
             assert (args == expected)
 
     def test_17_dict_config(self):
@@ -565,13 +566,13 @@ class CacheTestCase(unittest.TestCase):
     def test_18_dict_config_initapp(self):
         cache = Cache()
         cache.init_app(self.app, config={'CACHE_TYPE': 'simple'})
-        from werkzeug.contrib.cache import SimpleCache
+        from cachelib import SimpleCache
         assert isinstance(self.app.extensions['cache'][cache], SimpleCache)
 
     def test_19_dict_config_both(self):
         cache = Cache(config={'CACHE_TYPE': 'null'})
         cache.init_app(self.app, config={'CACHE_TYPE': 'simple'})
-        from werkzeug.contrib.cache import SimpleCache
+        from cachelib import SimpleCache
         assert isinstance(self.app.extensions['cache'][cache], SimpleCache)
 
     def test_20_jinja2ext_cache(self):
@@ -623,15 +624,16 @@ class CacheTestCase(unittest.TestCase):
 if 'TRAVIS' in os.environ:
     try:
         import redis
+
         has_redis = True
     except ImportError:
         has_redis = False
 
-    if sys.version_info <= (2,7):
-
+    if sys.version_info <= (2, 7):
         class CacheMemcachedTestCase(CacheTestCase):
             def _set_app_config(self, app):
                 app.config['CACHE_TYPE'] = 'memcached'
+
 
         class SpreadCacheMemcachedTestCase(CacheTestCase):
             def _set_app_config(self, app):
@@ -653,7 +655,7 @@ if 'TRAVIS' in os.environ:
             from werkzeug.contrib.cache import RedisCache
             assert isinstance(self.app.extensions['cache'][cache], RedisCache)
             rconn = self.app.extensions['cache'][cache] \
-                        ._client.connection_pool.get_connection('foo')
+                ._client.connection_pool.get_connection('foo')
             assert rconn.db == 0
 
         @unittest.skipUnless(has_redis, "requires Redis")
@@ -665,7 +667,7 @@ if 'TRAVIS' in os.environ:
             cache = Cache()
             cache.init_app(self.app, config=config)
             rconn = self.app.extensions['cache'][cache] \
-                        ._client.connection_pool.get_connection('foo')
+                ._client.connection_pool.get_connection('foo')
             assert rconn.db == 2
 
         @unittest.skipUnless(has_redis, "requires Redis")
@@ -678,7 +680,7 @@ if 'TRAVIS' in os.environ:
             cache = Cache()
             cache.init_app(self.app, config=config)
             rconn = self.app.extensions['cache'][cache] \
-                        ._client.connection_pool.get_connection('foo')
+                ._client.connection_pool.get_connection('foo')
             assert rconn.db == 1
 
 
@@ -686,7 +688,6 @@ if 'TRAVIS' in os.environ:
         def _set_app_config(self, app):
             app.config['CACHE_TYPE'] = 'filesystem'
             app.config['CACHE_DIR'] = '/tmp'
-
 
 if __name__ == '__main__':
     unittest.main()

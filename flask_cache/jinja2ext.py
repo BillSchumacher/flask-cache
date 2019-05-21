@@ -30,7 +30,7 @@ Example:
 
 from jinja2 import nodes
 from jinja2.ext import Extension
-from flask.ext.cache import make_template_fragment_key
+from flask_cache import make_template_fragment_key
 
 JINJA_CACHE_ATTR_NAME = '_template_fragment_cache'
 
@@ -67,7 +67,7 @@ class CacheExtension(Extension):
         return nodes.CallBlock(self.call_method('_cache', args),
                                [], [], body).set_lineno(lineno)
 
-    def _cache(self, timeout, fragment_name, vary_on,  caller):
+    def _cache(self, timeout, fragment_name, vary_on, caller):
         try:
             cache = getattr(self.environment, JINJA_CACHE_ATTR_NAME)
         except AttributeError as e:

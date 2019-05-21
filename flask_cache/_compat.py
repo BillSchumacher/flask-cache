@@ -15,7 +15,6 @@ import sys
 PY2 = sys.version_info[0] == 2
 PYPY = hasattr(sys, 'pypy_translation_info')
 
-
 if not PY2:
     range_type = range
 else:

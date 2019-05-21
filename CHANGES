@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+Version 0.14 2019-05-21
+```````````````````````
+
+- Update imports to use modern flask style for extensions.
+- Reference cachelib since werkzeug removed the contrib.
+- Code style fixes.
+- Remove GAEMemcache since cachelib does not support it.
+  (Might add it to cachelib, might not I don't use it.
+   Is it really different than normal memcached?)
+- Fix import_string import from werkzeug.
+
 Version 0.13 2014-04-21
 ```````````````````````
 

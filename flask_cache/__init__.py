@@ -9,7 +9,7 @@
     :license: BSD, see LICENSE for more details
 """
 
-__version__ = '0.13'
+__version__ = '0.13a'
 __versionfull__ = __version__
 
 import base64
@@ -21,7 +21,7 @@ import string
 import uuid
 import warnings
 
-from werkzeug import import_string
+from werkzeug.utils import import_string
 from flask import request, current_app
 
 from ._compat import PY2
@@ -36,7 +36,8 @@ delchars = ''.join(c for c in map(chr, range(256)) if c not in valid_chars)
 if PY2:
     null_control = (None, delchars)
 else:
-    null_control = (dict((k,None) for k in delchars),)
+    null_control = (dict((k, None) for k in delchars),)
+
 
 def function_namespace(f, args=None):
     """
@@ -48,11 +49,11 @@ def function_namespace(f, args=None):
     instance_self = getattr(f, '__self__', None)
 
     if instance_self \
-    and not inspect.isclass(instance_self):
+            and not inspect.isclass(instance_self):
         instance_token = repr(f.__self__)
     elif m_args \
-    and m_args[0] == 'self' \
-    and args:
+            and m_args[0] == 'self' \
+            and args:
         instance_token = repr(args[0])
 
     module = f.__module__
@@ -63,7 +64,7 @@ def function_namespace(f, args=None):
         klass = getattr(f, '__self__', None)
 
         if klass \
-        and not inspect.isclass(klass):
+                and not inspect.isclass(klass):
             klass = klass.__class__
 
         if not klass:
@@ -91,6 +92,7 @@ def function_namespace(f, args=None):
         ins = None
 
     return ns, ins
+
 
 def make_template_fragment_key(fragment_name, vary_on=[]):
     """
@@ -169,7 +171,7 @@ class Cache(object):
                 cache_obj = getattr(backends, import_me)
             except AttributeError:
                 raise ImportError("%s is not a valid FlaskCache backend" % (
-                                  import_me))
+                    import_me))
         else:
             cache_obj = import_string(import_me)
 
@@ -184,7 +186,7 @@ class Cache(object):
 
         app.extensions.setdefault('cache', {})
         app.extensions['cache'][self] = cache_obj(
-                app, config, cache_args, cache_options)
+            app, config, cache_args, cache_options)
 
     @property
     def cache(self):
@@ -297,7 +299,7 @@ class Cache(object):
                     rv = f(*args, **kwargs)
                     try:
                         self.cache.set(cache_key, rv,
-                                   timeout=decorated_function.cache_timeout)
+                                       timeout=decorated_function.cache_timeout)
                     except Exception:
                         if current_app.debug:
                             raise
@@ -320,6 +322,7 @@ class Cache(object):
             decorated_function.make_cache_key = make_cache_key
 
             return decorated_function
+
         return decorator
 
     def _memvname(self, funcname):
@@ -375,6 +378,7 @@ class Cache(object):
         """
         Function used to create the cache_key for memoized functions.
         """
+
         def make_cache_key(f, *args, **kwargs):
             _timeout = getattr(timeout, 'cache_timeout', timeout)
             fname, version_data = self._memoize_version(f, args=args,
@@ -389,8 +393,8 @@ class Cache(object):
 
             if callable(f):
                 keyargs, keykwargs = self._memoize_kwargs_to_args(f,
-                                                                 *args,
-                                                                 **kwargs)
+                                                                  *args,
+                                                                  **kwargs)
             else:
                 keyargs, keykwargs = args, kwargs
 
@@ -406,6 +410,7 @@ class Cache(object):
             cache_key += version_data
 
             return cache_key
+
         return make_cache_key
 
     def _memoize_kwargs_to_args(self, f, *args, **kwargs):
@@ -431,8 +436,8 @@ class Cache(object):
             elif arg_num < len(args):
                 arg = args[arg_num]
                 arg_num += 1
-            elif abs(i-args_len) <= len(argspec.defaults):
-                arg = argspec.defaults[i-args_len]
+            elif abs(i - args_len) <= len(argspec.defaults):
+                arg = argspec.defaults[i - args_len]
                 arg_num += 1
             else:
                 arg = None
@@ -537,7 +542,7 @@ class Cache(object):
                     rv = f(*args, **kwargs)
                     try:
                         self.cache.set(cache_key, rv,
-                                   timeout=decorated_function.cache_timeout)
+                                       timeout=decorated_function.cache_timeout)
                     except Exception:
                         if current_app.debug:
                             raise
@@ -547,10 +552,11 @@ class Cache(object):
             decorated_function.uncached = f
             decorated_function.cache_timeout = timeout
             decorated_function.make_cache_key = self._memoize_make_cache_key(
-                                                make_name, decorated_function)
+                make_name, decorated_function)
             decorated_function.delete_memoized = lambda: self.delete_memoized(f)
 
             return decorated_function
+
         return memoize
 
     def delete_memoized(self, f, *args, **kwargs):
@@ -656,8 +662,7 @@ class Cache(object):
         """
         if not callable(f):
             raise DeprecationWarning("Deleting messages by relative name is no longer"
-                          " reliable, please switch to a function reference")
-
+                                     " reliable, please switch to a function reference")
 
         try:
             if not args and not kwargs:
@@ -684,7 +689,7 @@ class Cache(object):
         """
         if not callable(f):
             raise DeprecationWarning("Deleting messages by relative name is no longer"
-                          " reliable, please use a function reference")
+                                     " reliable, please use a function reference")
 
         try:
             self._memoize_version(f, delete=True)
