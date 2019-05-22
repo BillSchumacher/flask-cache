@@ -156,11 +156,11 @@ class Cache(object):
                           "caching is effectively disabled.")
 
         if self.with_jinja2_ext:
-            from .jinja2ext import CacheExtension, DomainCacheExtension, JINJA_CACHE_ATTR_NAME
+            from .jinja2ext import CacheExtension, DomainPathCacheExtension, JINJA_CACHE_ATTR_NAME
 
             setattr(app.jinja_env, JINJA_CACHE_ATTR_NAME, self)
             app.jinja_env.add_extension(CacheExtension)
-            app.jinja_env.add_extension(DomainCacheExtension)
+            app.jinja_env.add_extension(DomainPathCacheExtension)
 
         self._set_cache(app, config)
 
