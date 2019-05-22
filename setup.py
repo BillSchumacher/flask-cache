@@ -24,7 +24,7 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'Flask', 'cachelib'
+        'Flask', 'cachelib', 'pyfarmhash'
     ],
     test_suite='test_cache',
     classifiers=[
