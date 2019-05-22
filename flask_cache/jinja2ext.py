@@ -87,23 +87,17 @@ class CacheExtension(Extension):
         return rv
 
 
-class DomainCacheExtension(Extension):
+class DomainPathCacheExtension(Extension):
     tags = set(['domaincache'])
 
     def parse(self, parser):
         lineno = next(parser.stream).lineno
 
-        #: Parse timeout and domain
-        args = [parser.parse_expression(), parser.parse_expression()]
-
-        #: Parse fragment name
-        #: Grab the fragment name if it exists
-        #: otherwise, default to the old method of using the templates
-        #: lineno to maintain backwards compatibility.
-        if parser.stream.skip_if('comma'):
-            args.append(parser.parse_expression())
-        else:
-            args.append(nodes.Const("%s%s" % (parser.filename, lineno)))
+        args = [
+            parser.parse_expression(),  # Timeout
+            parser.parse_expression(),  # Domain
+            parser.parse_expression(),  # Path
+            nodes.Const("%s%s" % (parser.filename, lineno))]
 
         #: Parse vary_on parameters
         vary_on = []
@@ -119,13 +113,13 @@ class DomainCacheExtension(Extension):
         return nodes.CallBlock(self.call_method('_cache', args),
                                [], [], body).set_lineno(lineno)
 
-    def _cache(self, timeout, domain, fragment_name, vary_on, caller):
+    def _cache(self, timeout, domain, path, fragment_name, vary_on, caller):
         try:
             cache = getattr(self.environment, JINJA_CACHE_ATTR_NAME)
         except AttributeError as e:
             raise e
 
-        key = make_template_fragment_key('{0}{1}'.format(domain, fragment_name), vary_on=vary_on)
+        key = make_template_fragment_key('_'.join([domain, path, fragment_name]), vary_on=vary_on)
 
         #: Delete key if timeout is 'del'
         if timeout == "del":

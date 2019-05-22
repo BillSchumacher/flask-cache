@@ -9,7 +9,7 @@
     :license: BSD, see LICENSE for more details
 """
 
-__version__ = '0.14a'
+__version__ = '0.14a2'
 __versionfull__ = __version__
 
 import base64
@@ -20,6 +20,7 @@ import logging
 import string
 import uuid
 import warnings
+import farmhash
 
 from werkzeug.utils import import_string
 from flask import request, current_app
@@ -100,7 +101,7 @@ def make_template_fragment_key(fragment_name, vary_on=[]):
     """
     if vary_on:
         fragment_name = "%s_" % fragment_name
-    return TEMPLATE_FRAGMENT_KEY_TEMPLATE % (fragment_name, "_".join(vary_on))
+    return farmhash.hash64(TEMPLATE_FRAGMENT_KEY_TEMPLATE % (fragment_name, "_".join(vary_on)))
 
 
 #: Cache Object
@@ -316,7 +317,7 @@ class Cache(object):
                 else:
                     cache_key = key_prefix
 
-                return cache_key
+                return farmhash.hash64(cache_key)
 
             decorated_function.uncached = f
             decorated_function.cache_timeout = timeout
@@ -400,17 +401,17 @@ class Cache(object):
                 keyargs, keykwargs = args, kwargs
 
             try:
-                updated = "{0}{1}{2}".format(altfname, keyargs, keykwargs)
+                updated = "{0}{1}{2}{3}".format(altfname, keyargs, keykwargs, version_data)
             except AttributeError:
-                updated = "%s%s%s" % (altfname, keyargs, keykwargs)
+                updated = "%s%s%s%s" % (altfname, keyargs, keykwargs, version_data)
 
-            cache_key = hashlib.md5()
-            cache_key.update(updated.encode('utf-8'))
-            cache_key = base64.b64encode(cache_key.digest())[:16]
-            cache_key = cache_key.decode('utf-8')
-            cache_key += version_data
+            #cache_key = hashlib.md5()
+            #cache_key.update(updated.encode('utf-8'))
+            #cache_key = base64.b64encode(cache_key.digest())[:16]
+            #cache_key = cache_key.decode('utf-8')
+            #cache_key += version_data
 
-            return cache_key
+            return farmhash.hash64('{0}{1}'.format(updated, version_data)) #cache_key
 
         return make_cache_key
 

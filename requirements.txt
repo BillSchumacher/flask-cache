@@ -1,3 +1,4 @@
 git+git://github.com/mitsuhiko/werkzeug.git#egg=werkzeug
 git+git://github.com/mitsuhiko/flask.git#egg=flask
 git+git://github.com/pallets/cachelib.git#egg=cachelib
+pyfarmhash
