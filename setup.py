@@ -8,10 +8,11 @@ Adds cache support to your Flask application
 """
 
 from setuptools import setup
+from flask_cache import __version__
 
 setup(
     name='Flask-Cache',
-    version='0.14a2',
+    version=__version__,
     url='http://github.com/thadeusb/flask-cache',
     license='BSD',
     author='Thadeus Burgess',
