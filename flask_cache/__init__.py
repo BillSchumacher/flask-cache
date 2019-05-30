@@ -9,7 +9,7 @@
     :license: BSD, see LICENSE for more details
 """
 
-__version__ = '0.14a2'
+__version__ = '0.14a3'
 __versionfull__ = __version__
 
 import base64
@@ -101,7 +101,7 @@ def make_template_fragment_key(fragment_name, vary_on=[]):
     """
     if vary_on:
         fragment_name = "%s_" % fragment_name
-    return farmhash.hash64(TEMPLATE_FRAGMENT_KEY_TEMPLATE % (fragment_name, "_".join(vary_on)))
+    return farmhash.hash64(TEMPLATE_FRAGMENT_KEY_TEMPLATE % (fragment_name, "_".join(str(vary_on))))
 
 
 #: Cache Object
