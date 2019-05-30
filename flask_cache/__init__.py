@@ -24,6 +24,8 @@ from flask import request, current_app
 
 from ._compat import PY2
 
+__version__ = '0.14a4'
+__versionfull__ = __version__
 logger = logging.getLogger(__name__)
 
 TEMPLATE_FRAGMENT_KEY_TEMPLATE = '_template_fragment_cache_%s%s'
