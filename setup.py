@@ -8,7 +8,7 @@ Adds cache support to your Flask application
 """
 
 from setuptools import setup
-from flask_cache import __version__
+from flask_cache.__version__ import __version__
 
 setup(
     name='Flask-Cache',
